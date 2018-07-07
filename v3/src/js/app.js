@@ -85,7 +85,7 @@ import axios from 'axios';
   };
 
   const removeTodo = function (id) {
-    axios.delete('/todos/completed')
+    axios.delete(`/todos/${id}`)
       .then(() => {
         console.log('Delete todo', id);
         getTodos();
@@ -94,9 +94,11 @@ import axios from 'axios';
   };
 
   const toggleTodocompleted = function (id) {
-    axios.patch(`/todos/${id}`, { completed: !todos.completed })
+    const { completed } = todos.find(todo => todo.id === +id);
+    axios.patch(`/todos/${id}`, { completed: !completed })
       .then(() => {
         console.log('toggle completed', id);
+        getTodos();
       })
       .catch(err => console.log(err.response));
   };
@@ -110,38 +112,46 @@ import axios from 'axios';
       .catch(err => console.log(err.response));
   };
 
+  const removecompleted = function () {
+    axios.delete('/todos/completed')
+      .then(() => {
+        console.log('[REMOVE]');
+        getTodos();
+      })
+      .catch(err => console.log(err.response));
+  };
+
   // event
+  window.addEventListener('load', getTodos());
+
   inputtodo.addEventListener('keyup', e => {
     if (e.keyCode !== 13 || !inputtodo.value) return;
     addTodo(inputtodo.value);
     inputtodo.value = '';
+    getTodos();
     // renderHTML();
     // console.log(todos);
   });
 
   // delete
-
   list.addEventListener('click', e => {
-    if (!e.target.dataset.id) return;
-    if (e.target.nodeName === 'SPAN') { todos = todos.filter(todo => todo.id !== +e.target.dataset.id); }
-    renderHTML();
+    if (!e.target.dataset.id || e.target.nodeName !== 'SPAN' || e.target.parentNode.nodeName === 'LABEL') return;
+    // if (e.target.nodeName === 'SPAN') { todos = todos.filter(todo => todo.id !== +e.target.dataset.id); }
+    removeTodo(e.target.dataset.id);
+    getTodos();
+    // renderHTML();
   });
 
   // change toogle
   list.addEventListener('change', e => {
-    // console.log(e);
-    if (e.target.nodeName === 'INPUT') {
-      todos = todos.map(todo => {
-        return todo.id === +e.target.id ? Object.assign({}, todo, { completed: !todo.completed }) : todo;
-      });
-      renderHTML();
-    }
+    toggleTodocompleted(e.target.id);
   });
 
   tabMenu.addEventListener('click', e => {
     if (!e.target || !e.target.nodeName === 'A') return;
-    e.target.parentNode.parentNode.childNodes.forEach((node) => {
-      if (e.target.parentNode.nodeName === 'LI') { node.className = ''; }
+    e.target.parentNode.parentNode.childNodes.forEach(node => {
+      if (e.target.parentNode.nodeName === 'LI') { 
+        node.className = ''; }
     });
     e.target.parentNode.className = 'active';
     tabStatement = e.target.parentNode.id;
@@ -150,15 +160,13 @@ import axios from 'axios';
 
   // checked all Completed
   allCom.addEventListener('change', e => {
-    todos = todos.map(todo => Object.assign({}, todo, { completed: e.target.checked }));
-    renderHTML();
+    toggleTodocompleted();
   });
   // console.log(e.target.checked)
 
   // all remove list
   removeCom.addEventListener('click', () => {
-    todos = todos.filter(todo => !todo.completed);
-    renderHTML();
+    removecompleted();
   });
 
   window.addEventListener('load', () => {
