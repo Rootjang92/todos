@@ -1,0 +1,52 @@
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 col-md-offset-2">
+      <h1 class="title">Todos</h1>
+      <input id="input-todo" class="form-control input-lg" placeholder="What needs to be done?"
+        autofocus [(ngModel)]="content" (keyup.enter)="addTodo(input.value)" #input>
+      <!-- <ul class="nav nav-xs nav-pills">
+        <li id="all" class="active">
+          <a>All</a>
+        </li>
+        <li id="active">
+          <a>Active</a>
+        </li>
+        <li id="completed">
+          <a>Completed</a>
+        </li>
+      </ul> -->
+      <!--  pipe nav items  -->
+      <ul class="nav nav-xs nav-pills">
+        <li *ngFor="let navItem of navItems" [class.active]="navItem === currentItems" (click)="currentItems=navItem">
+          <a>{{ navItem }}</a>
+        </li>
+      </ul>
+      <!-- 기능 구현. -->
+      <ul id="todo-list" class="list-group" *ngIf="todos">
+        <li *ngFor= "let todo of todos | todosFilter : currentItems" class="list-group-item" >
+          <div class="hover-anchor">
+            <a class="hover-action text-muted">
+              <span class="glyphicon glyphicon-remove-circle pull-right" data-id="{{ todo.id }}" (click)="removeTodo(todo.id)"></span>
+            </a>
+            <label class="i-checks">
+              <input type="checkbox" id="com-checks" [checked]="todo.completed" (change)="toggleTodo(todo.id)"><i></i>
+              <span> {{ todo.content }} </span>
+            </label>
+          </div>
+        </li>
+      </ul>
+      <!-- template 문법 추가해야 하기 때문에 주석 해제. -->
+      <div class="col-xs-6">
+        <label class="i-checks" style="padding-left: 20px">
+          <input id="chk-allComplete" type="checkbox" (change)="toggleAll($event.target.checked)"><i></i><span>Mark all as complete</span>
+        </label>
+      </div>
+      <div class="col-xs-6 text-right" *ngIf="todos">
+        <button id="btn-removeCompletedTodos" class="btn btn-default btn-xs" (click)="removeAll($event.target.c)">Clear completed (<span id="completedTodos" [innerHTML]="countCom()">0</span>)</button>
+        <strong id="activeTodos" [innerHTML]="countLeft()"></strong> items left
+      </div>
+    </div>
+  </div>
+</div>
+
+
